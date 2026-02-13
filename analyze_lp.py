@@ -13,9 +13,6 @@ import io
 # Load environment variables
 load_dotenv()
 
-# Configuration
-REMOTE_BROWSER_URL = os.getenv("REMOTE_BROWSER_URL")
-
 async def scroll_to_bottom(page):
     """Scrolls to the bottom of the page to trigger lazy loading."""
     await page.evaluate("""
@@ -53,11 +50,18 @@ async def analyze_lp(url: str, api_key: str = None, model_name: str = "gemini-2.
         return {"error": f"SDKクライアントの初期化に失敗しました: {str(e)}"}
     
     async with async_playwright() as p:
-        if REMOTE_BROWSER_URL:
-            print(f"Connecting to remote browser at {REMOTE_BROWSER_URL}...")
-            browser = await p.chromium.connect_over_cdp(REMOTE_BROWSER_URL)
+        # Check env var inside the async block
+        remote_url = os.getenv("REMOTE_BROWSER_URL")
+        
+        if remote_url:
+            print(f"Connecting to remote browser (CDP)...")
+            try:
+                browser = await p.chromium.connect_over_cdp(remote_url)
+            except Exception as e:
+                print(f"Failed to connect to remote browser: {e}")
+                return {"error": f"リモートブラウザへの接続に失敗しました: {str(e)}"}
         else:
-            print("Launching local browser...")
+            print("WARNING: REMOTE_BROWSER_URL is not set. Attempting local launch (will fail on Vercel)...")
             browser = await p.chromium.launch(headless=True)
             
         context = await browser.new_context(

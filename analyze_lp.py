@@ -100,11 +100,11 @@ async def analyze_lp(url: str, api_key: str = None, model_name: str = "gemini-2.
             return {"error": f"Failed to load page: {str(e)}"}
         
         # Take full page screenshot
-        screenshot_path = "lp_screenshot.png"
+        screenshot_path = "/tmp/lp_screenshot.png"
         await page.screenshot(path=screenshot_path, full_page=True, type="png")
         
         # Image Compression Logic (Keeping it but increasing quality)
-        compressed_path = "lp_screenshot_min.jpg"
+        compressed_path = "/tmp/lp_screenshot_min.jpg"
         try:
             with Image.open(screenshot_path) as img:
                 # Convert to RGB

@@ -64,9 +64,13 @@ def analyze():
 
 @app.route('/screenshot')
 def screenshot():
-    if os.path.exists('lp_screenshot_min.jpg'):
-        return send_from_directory('.', 'lp_screenshot_min.jpg')
-    return send_from_directory('.', 'lp_screenshot.png')
+    # Use /tmp for Vercel compatibility
+    tmp_dir = '/tmp'
+    if os.path.exists(os.path.join(tmp_dir, 'lp_screenshot_min.jpg')):
+        return send_from_directory(tmp_dir, 'lp_screenshot_min.jpg')
+    if os.path.exists(os.path.join(tmp_dir, 'lp_screenshot.png')):
+        return send_from_directory(tmp_dir, 'lp_screenshot.png')
+    return "Screenshot not found", 404
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

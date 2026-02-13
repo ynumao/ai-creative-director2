@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LP分析2号 | AI Framework Analyst</title>
+    <style>
+        :root {
+            --bg: #fafafa;
+            --surface: #ffffff;
+            --text-main: #000000;
+            --text-muted: #6b7280;
+            --border: #d1d5db;
+            --accent: #e60012;
+            --focus: #000000;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 80px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        h1 {
+            font-size: 64px;
+            font-weight: 300;
+            margin: 0;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+        }
+
+        .subtitle {
+            margin-top: 15px;
+            color: var(--text-muted);
+            font-size: 13px;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+        }
+
+        /* Tool Section */
+        .workspace {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 50px;
+            margin-bottom: 60px;
+        }
+
+        .input-group {
+            margin-bottom: 35px;
+        }
+
+        .label-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .label {
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+        }
+
+        .onboarding-link {
+            font-size: 11px;
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        .onboarding-link:hover {
+            text-decoration: underline;
+        }
+
+        input,
+        select {
+            width: 100%;
+            padding: 14px 20px;
+            font-size: 16px;
+            border: 1px solid var(--border);
+            background: transparent;
+            outline: none;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--focus);
+        }
+
+        .btn-primary {
+            width: 100%;
+            background: #222;
+            color: #fff;
+            border: none;
+            padding: 22px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 12px;
+            letter-spacing: 0.1em;
+            transition: background 0.2s;
+            text-transform: uppercase;
+        }
+
+        .btn-primary:hover {
+            background: #000;
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Results Display */
+        .results-layout {
+            display: none;
+            grid-template-columns: 320px 1fr;
+            gap: 40px;
+            margin-top: 60px;
+            align-items: start;
+        }
+
+        @media (max-width: 900px) {
+            .results-layout {
+                grid-template-columns: 1fr;
+            }
+
+            .side-column {
+                position: relative !important;
+                top: 0 !important;
+            }
+        }
+
+        .side-column {
+            position: sticky;
+            top: 40px;
+        }
+
+        .preview-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 20px;
+        }
+
+        .preview-container {
+            border: 1px solid #efefef;
+            background: #fdfdfd;
+            max-height: 500px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        #screenshotImg {
+            width: 100%;
+            display: block;
+        }
+
+        .report-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        h2 {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 35px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 12px;
+            display: inline-block;
+        }
+
+        /* Checklist */
+        .checkpoint-grid {
+            display: grid;
+            gap: 15px;
+        }
+
+        .checkpoint-row {
+            display: grid;
+            grid-template-columns: 160px 1fr 40px;
+            padding: 18px 0;
+            border-bottom: 1px solid #f0f0f0;
+            align-items: center;
+        }
+
+        .cp-name {
+            font-weight: 700;
+            font-size: 13px;
+        }
+
+        .cp-evidence {
+            font-size: 14px;
+            color: var(--text-muted);
+            padding: 0 15px;
+            line-height: 1.5;
+        }
+
+        .cp-score {
+            font-weight: 800;
+            font-size: 18px;
+            text-align: right;
+        }
+
+        .framework-box {
+            background: #fafafa;
+            border-left: 5px solid #000;
+            padding: 25px;
+            margin: 10px 0;
+        }
+
+        .content-item {
+            display: flex;
+            gap: 20px;
+            padding: 20px 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .item-num {
+            font-weight: 800;
+            opacity: 0.2;
+            font-size: 22px;
+            line-height: 1;
+        }
+
+        .item-content h4 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+        }
+
+        .item-content p {
+            margin: 0;
+            font-size: 14px;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        .improvement-card {
+            background: #000;
+            color: #fff;
+            padding: 25px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .comp-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .comp-box {
+            border: 1px solid var(--border);
+            padding: 20px;
+        }
+
+        .comp-name {
+            font-weight: 700;
+            margin-bottom: 8px;
+            display: block;
+            font-size: 14px;
+        }
+
+        .comp-link {
+            font-size: 11px;
+            color: var(--text-muted);
+            word-break: break-all;
+        }
+
+        /* Loader & Error */
+        .loader {
+            display: none;
+            text-align: center;
+            padding: 60px 0;
+        }
+
+        .error-box {
+            display: none;
+            background: #fffafa;
+            color: #c00;
+            padding: 25px;
+            border: 1px solid #c00;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>LP分析2号</h1>
+            <div class="subtitle">Framework-Based LP Analysis</div>
+        </header>
+
+        <section class="workspace">
+            <div class="input-group">
+                <div class="label-row">
+                    <span class="label">Gemini APIキー</span>
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="onboarding-link">取得はこちら
+                        ↗</a>
+                </div>
+                <input type="password" id="apiKey" placeholder="AI Studioで発行したキーを入力してください">
+            </div>
+
+            <div class="input-group">
+                <span class="label">使用AIモデル</span>
+                <select id="modelSelect">
+                    <option value="gemini-2.0-flash">Gemini 2.0 Flash (推奨)</option>
+                    <option value="gemini-flash-latest">Gemini 1.5 Flash</option>
+                    <option value="gemini-pro-latest">Gemini 1.5 Pro</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <span class="label">分析対象URL</span>
+                <input type="text" id="lpUrl" placeholder="https://example.com/lp"
+                    value="https://green-spoon.jp/search_lp/110">
+            </div>
+
+            <button id="analyzeBtn" class="btn-primary">
+                分析を開始する →
+            </button>
+        </section>
+
+        <div id="errorBox" class="error-box"></div>
+
+        <div id="loader" class="loader">
+            <div style="font-size: 12px; letter-spacing: 0.2em; color: #666; animation: fade 1.5s infinite;">
+                LPの構造を解析中...</div>
+            <div style="font-size: 10px; margin-top: 10px; color: #999;">※画像生成と解析に最大90秒程度かかる場合があります</div>
+        </div>
+
+        <div id="results" class="results-layout">
+            <!-- Left Side: Sticky Preview -->
+            <div class="side-column">
+                <div class="preview-box">
+                    <div class="label" style="margin-bottom: 12px;">LPスキャン結果</div>
+                    <div class="preview-container">
+                        <img id="screenshotImg" src="" alt="LP Scan">
+                    </div>
+                </div>
+                <div id="modelBadge" style="margin-top: 15px; font-size: 9px; color: #999; text-align: right;"></div>
+            </div>
+
+            <!-- Right Side: Detailed Report -->
+            <div class="main-column">
+                <div class="report-section">
+                    <h2>7つのチェックポイント評価</h2>
+                    <div id="checklistContainer" class="checkpoint-grid"></div>
+                </div>
+
+                <div class="report-section">
+                    <h2>選定フレームワーク</h2>
+                    <div class="framework-box">
+                        <div id="frameworkTitle" style="font-weight: 800; font-size: 18px; margin-bottom: 8px;"></div>
+                        <div id="frameworkDesc" style="color: #444; line-height: 1.7; font-size: 14px;"></div>
+                    </div>
+                </div>
+
+                <div class="report-section">
+                    <h2>セクション別詳細解説</h2>
+                    <div id="contentList"></div>
+                </div>
+
+                <div class="report-section">
+                    <h2>改善課題と提案</h2>
+                    <div id="improvementList"></div>
+                </div>
+
+                <div class="report-section">
+                    <h2>競合他社の分析</h2>
+                    <div id="competitorGrid" class="comp-grid"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const analyzeBtn = document.getElementById('analyzeBtn');
+        const lpUrl = document.getElementById('lpUrl');
+        const apiKey = document.getElementById('apiKey');
+        const loader = document.getElementById('loader');
+        const results = document.getElementById('results');
+        const errorBox = document.getElementById('errorBox');
+        const screenshotImg = document.getElementById('screenshotImg');
+
+        analyzeBtn.addEventListener('click', async () => {
+            const url = lpUrl.value.trim();
+            const key = apiKey.value.trim();
+            const model = document.getElementById('modelSelect').value;
+
+            if (!key || !url) {
+                alert('APIキーとURLを入力してください。');
+                return;
+            }
+
+            analyzeBtn.disabled = true;
+            loader.style.display = 'block';
+            results.style.display = 'none';
+            errorBox.style.display = 'none';
+
+            try {
+                const response = await fetch('/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ url, api_key: key, model })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || '分析エラーが発生しました。');
+                }
+
+                if (data.is_fallback) {
+                    alert('モデル制限により、' + data.used_model + ' で分析を完了しました。');
+                }
+
+                renderResults(data);
+            } catch (err) {
+                errorBox.innerText = err.message;
+                errorBox.style.display = 'block';
+                errorBox.scrollIntoView({ behavior: 'smooth' });
+            } finally {
+                analyzeBtn.disabled = false;
+                loader.style.display = 'none';
+            }
+        });
+
+        function renderResults(data) {
+            console.log('Results data:', data);
+
+            // Show result area
+            results.style.display = 'grid';
+
+            // Set screenshot separately to avoid issues
+            const imgElement = document.getElementById('screenshotImg');
+            if (imgElement) {
+                imgElement.src = '/screenshot?t=' + Date.now();
+            } else {
+                console.error('screenshotImg element not found!');
+            }
+
+            document.getElementById('modelBadge').innerText = `MODEL: ${data.used_model || 'Unknown'}`;
+
+            // 1. Checkpoints
+            const ckContainer = document.getElementById('checklistContainer');
+            ckContainer.innerHTML = '';
+            const checkpoints = data.チェックリスト評価 || data.checkpoints || data.評価 || [];
+            if (Array.isArray(checkpoints)) {
+                checkpoints.forEach(item => {
+                    const row = document.createElement('div');
+                    row.className = 'checkpoint-row';
+                    row.innerHTML = `
+                        <div class="cp-name">${item.項目 || item.name || '項目'}</div>
+                        <div class="cp-evidence">${item.根拠 || item.evidence || ''}</div>
+                        <div class="cp-score">${item.評価 || item.score || '-'}</div>
+                    `;
+                    ckContainer.appendChild(row);
+                });
+            }
+
+            // 2. Framework
+            document.getElementById('frameworkTitle').innerText = data.フレームワーク || data.framework || 'N/A';
+            document.getElementById('frameworkDesc').innerText = data.フレームワーク解説 || data.framework_desc || '';
+
+            // 3. Sections
+            const contentList = document.getElementById('contentList');
+            contentList.innerHTML = '';
+            const sections = data.構成 || data.sections || [];
+            sections.forEach((item, i) => {
+                const title = typeof item === 'object' ? (item.title || item.項目) : item;
+                const desc = typeof item === 'object' ? (item.description || item.概要 || '') : '';
+                const div = document.createElement('div');
+                div.className = 'content-item';
+                div.innerHTML = `
+                    <div class="item-num">${(i + 1).toString().padStart(2, '0')}</div>
+                    <div class="item-content">
+                        <h4>${title}</h4>
+                        <p>${desc}</p>
+                    </div>
+                `;
+                contentList.appendChild(div);
+            });
+
+            // 4. Improvements
+            const impList = document.getElementById('improvementList');
+            impList.innerHTML = '';
+            const imps = data.改善課題 || data.improvements || [];
+            imps.forEach(text => {
+                const div = document.createElement('div');
+                div.className = 'improvement-card';
+                div.innerText = text;
+                impList.appendChild(div);
+            });
+
+            // 5. Competitors
+            const compGrid = document.getElementById('competitorGrid');
+            compGrid.innerHTML = '';
+            const comps = data.競合他社 || data.competitors || [];
+            comps.forEach(c => {
+                const div = document.createElement('div');
+                div.className = 'comp-box';
+                div.innerHTML = `
+                    <span class="comp-name">${c.社名 || c.name || '競合'}</span>
+                    <a href="${c.URL || c.url || '#'}" target="_blank" class="comp-link">${c.URL || c.url || ''}</a>
+                `;
+                compGrid.appendChild(div);
+            });
+
+            // Scroll to results
+            results.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+    <style>
+        @keyframes fade {
+
+            0%,
+            100% {
+                opacity: 0.4;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+    </style>
+</body>
+
+</html>

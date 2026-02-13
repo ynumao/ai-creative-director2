@@ -1,0 +1,7 @@
+flask
+flask-cors
+playwright
+google-genai
+Pillow
+python-dotenv
+asyncio

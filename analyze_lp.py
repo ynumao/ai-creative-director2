@@ -50,18 +50,27 @@ async def analyze_lp(url: str, api_key: str = None, model_name: str = "gemini-2.
         return {"error": f"SDKクライアントの初期化に失敗しました: {str(e)}"}
     
     async with async_playwright() as p:
-        # Check env var inside the async block
-        remote_url = os.getenv("REMOTE_BROWSER_URL")
+        # Check env var
+        remote_url = os.environ.get("REMOTE_BROWSER_URL")
+        
+        # Debug: Print all env keys to Vercel logs (safe)
+        print(f"DEBUG: Available environment keys: {list(os.environ.keys())}")
         
         if remote_url:
-            print(f"Connecting to remote browser (CDP)...")
+            print(f"Connecting to remote browser: {remote_url[:15]}...")
             try:
                 browser = await p.chromium.connect_over_cdp(remote_url)
             except Exception as e:
-                print(f"Failed to connect to remote browser: {e}")
-                return {"error": f"リモートブラウザへの接続に失敗しました: {str(e)}"}
+                print(f"Remote connection failed: {e}")
+                return {"error": f"リモートブラウザに接続できませんでした。URLまたはトークンを確認してください。: {str(e)}"}
         else:
-            print("WARNING: REMOTE_BROWSER_URL is not set. Attempting local launch (will fail on Vercel)...")
+            # Check if we are on Vercel (usually has VERCEL=1)
+            is_vercel = os.environ.get("VERCEL") == "1"
+            if is_vercel:
+                print("ERROR: REMOTE_BROWSER_URL is missing on Vercel!")
+                return {"error": "環境変数 'REMOTE_BROWSER_URL' が設定されていません。Vercelの管理画面で設定し、デプロイし直してください。"}
+            
+            print("Launching local browser (Development mode)...")
             browser = await p.chromium.launch(headless=True)
             
         context = await browser.new_context(
